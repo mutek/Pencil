@@ -1,0 +1,102 @@
+#!/usr/bin/env sh
+# )A( - Andromeda Appificator 13.08.27
+# startApp proxy launcher
+# Luca Cappelletti (c) 2010-2013
+# licensed under the terms of GNU/GPL
+#
+# take into account arguments
+# do quote because it passes the LaunchPad parsing
+
+## hardcoded debug mode
+[ -z $DEBUG ] && DEBUG="No"
+if tty -s
+then
+:
+else
+
+        if [ "$DEBUG" = "Yes" ]
+        then
+
+                xterm -e $0
+                
+        else
+        :
+        fi
+        
+fi
+
+# check against Share service
+if [ -h /home/Pencil/Share ] && [ -e /home/Pencil/Share ] && [ -d /tmp/Share ]
+then
+:
+else
+        # just remove and rebuild
+        rm -rf --preserve-root /home/Pencil/Share
+        # add /tmp/Share root owner, valid only in first install
+        #2>/dev/null ASAP after debug
+        mkdir -p /tmp/Share 
+        # world only read write not exec (anti malware)
+        chmod -R 777 /tmp/Share
+
+        ln -s /tmp/Share /home/Pencil/Share
+        wait
+fi
+
+
+# check against Volatile cache service
+if [ -h /home/Pencil/.cache/Volatile ] && [ -e /home/Pencil/.cache/Volatile ]
+then
+:
+else
+
+        rm -rf --preserve-root /tmp/Pencil 2>/dev/null
+        rm -rf --preserve-root /home/Pencil/.cache/Volatile 2>/dev/null
+        mkdir -p /tmp/Pencil 2>/dev/null
+        chmod -R 700 /tmp/Pencil 2>/dev/null
+        ln -s /tmp/Pencil /home/Pencil/.cache/Volatile 2>/dev/null
+
+fi
+
+# try to start pulseaudio!!
+if [ -x $(which start-pulseaudio-x11) ]
+then
+
+        start-pulseaudio-x11 &
+        
+else
+:
+fi
+
+
+if [ "$#" -eq 0 ]
+then
+
+:
+
+else
+
+        arguments="$@"
+        
+fi
+
+# d u nou sQr pshr?
+if [ -x /home/Pencil/.App/ioPencil0.5.4dev-Debian7/Linux-ia32/startApp ] || [ "$(mount | grep -w Pencil)" != "" ]
+then
+:
+else
+
+# force umount also if not mounted
+$(which sudo) $(which umount) -d -f -l /home/Pencil/.App
+wait
+
+# mount over also if just mounted
+$(which sudo) $(which mount) -t iso9660 -o loop,noatime,nodiratime,norelatime,exec,uid=Pencil,gid=Pencil /home/Pencil/.App/Pencil.app /home/Pencil/.App
+wait
+fi
+
+export PATH=/home/Pencil:/home/Pencil/bin:/home/Pencil/.local/bin:/home/Pencil/.App:/home/Pencil/.App/bin:$PATH
+export LD_LIBRARY_PATH=/home/Pencil:/home/Pencil/lib:/home/Pencil/.local/lib:/home/Pencil/.App:/home/Pencil/.App/lib:$LD_LIBRARY_PATH
+
+dbus-launch --exit-with-session /home/Pencil/.App/ioPencil0.5.4dev-Debian7/Linux-ia32/startApp $arguments
+
+exit 0

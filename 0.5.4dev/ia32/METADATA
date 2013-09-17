@@ -1,0 +1,10 @@
+APP_NAME=Pencil
+APP_RELEASE=0.5.4dev
+APP_KERNEL=Linux
+APP_OS=Debian7
+APP_PLATFORM=ia32
+
+APP_BIN=startApp
+
+APP_ROOT=ioPencil0.5.4dev-Debian7/Linux-ia32
+
